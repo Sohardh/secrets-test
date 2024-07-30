@@ -20,4 +20,19 @@ jobs:
       shell: bash
       run: |
        git fetch origin
-       
+       git checkout "${TARGET_BRANCH}"
+       git checkout "${SOURCE_BRANCH}"
+ 
+       CHANGED_FILES=$(git diff --diff-filter=ACMR --name-only --ignore-submodules $(git merge-base "${SOURCE_BRANCH}" "${TARGET_BRANCH}") "${SOURCE_BRANCH}")
+       if [ "x${CHANGED_FILES}" == "x" ]; then
+         echo "Skipped Code Insights SD Policy Scan as git diff returned empty file list" && exit 0
+       fi
+        
+       wget --quiet -O code-insights-cli.jar https://download.blueoptima.com/codeinsights/code-insights-cli.jar
+        
+       SD_CMD="java -DCI_CORE_HOST=https://${integrator_host}:${port} -DCI_INSTALL_ID=github-actions-${project-name} -jar code-insights-cli.jar --fail-policy=high --channel=ci-cd --sd"
+       while IFS= read -r file; do
+         SD_CMD="$SD_CMD \"$file\""
+       done <<< "${CHANGED_FILES}"
+ 
+       eval "${SD_CMD}"
