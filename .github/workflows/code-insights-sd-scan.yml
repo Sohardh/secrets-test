@@ -36,3 +36,12 @@ jobs:
        done <<< "${CHANGED_FILES}"
  
        eval "${SD_CMD}"
+    - name: Send notification to JIRA
+      uses: alstn2468/jira-publish-notification@v1.0.0
+      if: ${{ github.event_name == 'push' }}
+      with:
+        GITHUB_TOKEN: '${{ secrets.G_TOKEN }}'
+        JIRA_CLIENT_ID: '${{ secrets.JIRA_CLIENT_ID }}'
+        JIRA_CLIENT_SECRET: '${{ secrets.JIRA_CLIENT_SECRET }}'
+        JIRA_INSTANCE: 'sohardh'
+        DEPLOY_ENVIRONMENT: 'dev'
