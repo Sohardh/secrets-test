@@ -44,4 +44,3 @@ jobs:
        done <<< "${CHANGED_FILES}"
  
        eval "${SD_CMD}"
-
